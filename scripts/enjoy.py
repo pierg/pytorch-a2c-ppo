@@ -47,7 +47,7 @@ done = True
 while True:
     if done:
         obs = env.reset()
-        print("Instr:", obs["mission"])
+        # print("Instr:", obs["mission"])
 
     time.sleep(args.pause)
     renderer = env.render("human")

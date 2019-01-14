@@ -10,7 +10,8 @@ import sys
 
 try:
     import gym_minigrid
-except ImportError:
+except ImportError as e:
+    print(e)
     pass
 
 import utils
