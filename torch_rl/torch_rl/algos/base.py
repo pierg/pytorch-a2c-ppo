@@ -122,6 +122,8 @@ class BaseAlgo(ABC):
             reward, policy loss, value loss, etc.
         """
 
+        steps_reach_goal = []
+        steps_to_goal = -1
         for i in range(self.num_frames_per_proc):
             # Do one agent-environment interaction
 
@@ -133,7 +135,7 @@ class BaseAlgo(ABC):
                     dist, value = self.acmodel(preprocessed_obs)
             action = dist.sample()
 
-            obs, reward, done, _ = self.env.step(action.cpu().numpy())
+            obs, reward, done, _info = self.env.step(action.cpu().numpy())
 
             # Update experiences values
 
@@ -155,6 +157,11 @@ class BaseAlgo(ABC):
                 self.rewards[i] = torch.tensor(reward, device=self.device)
             self.log_probs[i] = dist.log_prob(action)
 
+            for info_elem in _info:
+                if info_elem['goal'] == 1:
+                    steps_reach_goal.append(info_elem['epi_steps'])
+                    steps_to_goal = numpy.array(steps_reach_goal)
+
             # Update log values
 
             self.log_episode_return += torch.tensor(reward, device=self.device, dtype=torch.float)
@@ -171,6 +178,8 @@ class BaseAlgo(ABC):
             self.log_episode_return *= self.mask
             self.log_episode_reshaped_return *= self.mask
             self.log_episode_num_frames *= self.mask
+
+
 
         # Add advantage and return to experiences
 
@@ -226,7 +235,8 @@ class BaseAlgo(ABC):
             "return_per_episode": self.log_return[-keep:],
             "reshaped_return_per_episode": self.log_reshaped_return[-keep:],
             "num_frames_per_episode": self.log_num_frames[-keep:],
-            "num_frames": self.num_frames
+            "num_frames": self.num_frames,
+            "steps_to_goal": steps_to_goal
         }
 
         self.log_done_counter = 0
