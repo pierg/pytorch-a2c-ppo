@@ -100,6 +100,7 @@ class BaseAlgo(ABC):
         self.log_return = [0] * self.num_procs
         self.log_reshaped_return = [0] * self.num_procs
         self.log_num_frames = [0] * self.num_procs
+        self.n_deaths = 0
 
     def collect_experiences(self):
         """Collects rollouts and computes advantages.
@@ -161,6 +162,8 @@ class BaseAlgo(ABC):
                 if info_elem['goal'] == 1:
                     steps_reach_goal.append(info_elem['epi_steps'])
                     steps_to_goal = numpy.array(steps_reach_goal)
+                if info_elem['died'] == 1:
+                    self.n_deaths += 1
 
             # Update log values
 
@@ -236,7 +239,8 @@ class BaseAlgo(ABC):
             "reshaped_return_per_episode": self.log_reshaped_return[-keep:],
             "num_frames_per_episode": self.log_num_frames[-keep:],
             "num_frames": self.num_frames,
-            "steps_to_goal": steps_to_goal
+            "steps_to_goal": steps_to_goal,
+            "n_deaths": self.n_deaths
         }
 
         self.log_done_counter = 0
