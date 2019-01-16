@@ -161,7 +161,6 @@ class BaseAlgo(ABC):
             for info_elem in _info:
                 if info_elem['goal'] == 1:
                     steps_reach_goal.append(info_elem['epi_steps'])
-                    steps_to_goal = numpy.array(steps_reach_goal)
                 if info_elem['died'] == 1:
                     self.n_deaths += 1
 
@@ -233,6 +232,9 @@ class BaseAlgo(ABC):
         # Log some values
 
         keep = max(self.log_done_counter, self.num_procs)
+
+        if steps_reach_goal:
+            steps_to_goal = numpy.array(steps_reach_goal).mean()
 
         log = {
             "return_per_episode": self.log_return[-keep:],
