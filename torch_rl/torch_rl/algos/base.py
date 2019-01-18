@@ -101,6 +101,7 @@ class BaseAlgo(ABC):
         self.log_reshaped_return = [0] * self.num_procs
         self.log_num_frames = [0] * self.num_procs
         self.n_deaths = 0
+        self.n_violations = 0
 
     def collect_experiences(self):
         """Collects rollouts and computes advantages.
@@ -163,6 +164,7 @@ class BaseAlgo(ABC):
                     steps_reach_goal.append(info_elem['epi_steps'])
                 if info_elem['died'] == 1:
                     self.n_deaths += 1
+                self.n_violations += info_elem['violations']
 
             # Update log values
 
@@ -242,7 +244,8 @@ class BaseAlgo(ABC):
             "num_frames_per_episode": self.log_num_frames[-keep:],
             "num_frames": self.num_frames,
             "steps_to_goal": steps_to_goal,
-            "n_deaths": self.n_deaths
+            "n_deaths": self.n_deaths,
+            "n_violations": self.n_violations
         }
 
         self.log_done_counter = 0
